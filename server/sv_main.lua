@@ -20,14 +20,18 @@ RegisterServerEvent("motels:rentRoom")
 AddEventHandler("motels:rentRoom", function(motelId, roomId, target)
     local src = source
     TriggerEvent('redemrp:getPlayerFromId', src, function(user)
-        MySQL.Async.execute("UPDATE `keys` SET holder = @holder, roommate = @roommate WHERE `key` = @key", {
-            ["@holder"] = user.getIdentifier(),
-            ["@roommate"] = "",
-            ["@key"] = "key_"..motelId.."_"..roomId
-        })
-        TriggerClientEvent("motels:updateOwnedKeys",src, motelId, roomId, true, "")
+        if user.getMoney() >= 10 then
+            user.removeMoney(tonumber(10))
+            MySQL.Async.execute("UPDATE `keys` SET holder = @holder, roommate = @roommate WHERE `key` = @key", {
+                ["@holder"] = user.getIdentifier(),
+                ["@roommate"] = "",
+                ["@key"] = "key_"..motelId.."_"..roomId
+            })
+            TriggerClientEvent("motels:updateOwnedKeys",src, motelId, roomId, true, "")
+        else
+            return
+        end
     end)
-
 end)
 
 RegisterServerEvent("motels:unRent")
